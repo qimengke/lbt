@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>lunbotu</title>
+	<style>
+	#container{position: relative;height: 400px;margin-top:50px;margin-left:100px;width: 800px;overflow: hidden;}
+	#slider{height: 400px;position:absolute;left: 0;top:0;}
+	#arrow{position: relative;height: 40px;width: 800px;/*border: 2px solid gray;*/top: 40%;}
+	#arrow span{width: 40px;display: block;height: 40px;background: gray;opacity: 0.8;filter: alpha(opacity=80);font:bolder 22px/40px "";text-align: center;color: red;}
+	#arrow #a_l{position: absolute;left:0;top:0;}
+	#arrow #a_r{position: absolute;right:0;top:0;}
+	img{width: 800px;height: 400px;float: left;}
+	#circle{position: absolute;height: 30px;bottom:10px;background: gray;opacity: 0.5;filter: alpha(opacity=50);}
+	#circle span{width:15px;height:15px;margin-left:10px;border-radius: 15px;display: inline-block;vertical-align: middle;background: #ccc;}
+	</style>
+	<script>
+	window.onload=function(){
+		var _slider=new Slider({
+			"img1":"images/img1.jpg",
+			"img2":"images/img2.jpg",
+			"img3":"images/img3.jpg",
+			"img4":"images/img4.jpg",
+			"img5":"images/img5.jpg",
+			"img6":"images/img6.jpg",
+		},100,30);
+		_slider.createDom();
+		_slider.initCss();
+		var _timer=window.setTimeout(function(){
+			_slider.autoRun();},2000);
+		document.getElementById("a_l").onclick=function(){
+			window.clearTimeout(_timer);
+			_slider.leftRun();
+			_timer=window.setTimeout(function(){
+			_slider.autoRun();},2000);
+		}
+		document.getElementById("a_r").onclick=function(){
+			window.clearTimeout(_timer);
+			_slider.rightRun();
+			_timer=window.setTimeout(function(){
+			_slider.autoRun();},2000);
+		}
+		var _points=document.getElementById("circle").getElementsByTagName('span');
+		for(var i=0;i<_points.length;i++){
+			(function (n){
+				_points[i].onclick=function(){
+					window.clearTimeout(_timer);
+					_slider.circleClick(n);
+					_timer=window.setTimeout(function(){
+			_slider.autoRun();},2000);
+				}
+			})(i);
+		}
+
+	}
+	function Slider(_obj,step,_t){
+		var _container=document.getElementById('container');
+		var _s=document.getElementById("slider");
+		var _c=document.getElementById("circle");
+		this.images=_obj;
+		
+		this.createDom=function(){
+			var _img=null,_point=null;
+			for(var key in this.images){
+				_img=document.createElement("img");
+				_img.src=this.images[key];
+				_s.appendChild(_img);
+				_point=document.createElement("span");
+				_c.appendChild(_point);
+			}
+			_img=document.createElement("img");
+			_img.src=this.images["img1"];
+			_s.appendChild(_img);
+		}
+		this.initCss=function(){
+			_c.style.width=_c.children.length*25+10+"px";
+			_c.style.left=(_container.clientWidth-_c.clientWidth)/2+"px";
+			_c.children[0].style.backgroundColor="red";
+			_s.style.width=_container.clientWidth*_s.children.length+"px";
+		}
+		var _timer=0,_index=0;
+		function pointControl(){
+			for(var i=0;i<_c.children.length;i++){
+				_c.children[i].style.backgroundColor="#ccc";
+			}
+			_c.children[_index].style.backgroundColor="red";
+		}
+		this.leftRun=function(){
+			window.clearTimeout(_timer);
+			var _step=0;
+			var m_l=_container.clientWidth*(_s.children.length-1);
+			var _left=parseInt((_s.currentStyle||window.getComputedStyle(_s,null))["left"].replace("px",""));
+			// console.log(_left);
+			_left=(_left<=-m_l?0:_left);
+			_step=Math.abs(_left)%_container.clientWidth;
+			_left=Math.ceil(_left/_container.clientWidth)*_container.clientWidth;//,_left=-200shi,cishiwei0,向上取整
+			(function exec(){
+				window.clearTimeout(_timer);
+				_step+=100;
+				_s.style.left=_left-_step+"px";
+				if(_step<_container.clientWidth){
+					_timer=window.setTimeout(exec,_t);
+				}else{
+					_left=parseInt((_s.currentStyle||window.getComputedStyle(_s,null))["left"].replace("px",""));
+					_index=Math.abs(_left/_container.clientWidth);
+					_index=_index==_c.children.length?0:_index;
+					pointControl();
+				}
+			})()
+		}
+		this.rightRun=function(){
+			window.clearTimeout(_timer);
+			var _step=0;
+			var m_l=_container.clientWidth*(_s.children.length-1);
+			var _left=parseInt((_s.currentStyle||window.getComputedStyle(_s,null))["left"].replace("px",""));
+			_left=(_left>=0?-m_l:_left);
+			_step=Math.abs(_left)%_container.clientWidth;
+			_left=Math.ceil(_left/_container.clientWidth)*_container.clientWidth;//,_left=-200shi,cishiwei0,向上取整
+			(function exec(){
+				window.clearTimeout(_timer);
+				_step+=100;
+				_s.style.left=_left+_step+"px";
+				if(_step<_container.clientWidth){
+					_timer=window.setTimeout(exec,_t);
+				}else{
+					_left=parseInt((_s.currentStyle||window.getComputedStyle(_s,null))["left"].replace("px",""));
+					_index=Math.abs(_left/_container.clientWidth);
+					_index=_index==_c.children.length?0:_index;
+					pointControl();
+				}
+			})()
+		}
+		this.autoRun=function(){
+			var m_l=_container.clientWidth*(_s.children.length-1);
+			var _left=0;
+
+			(function exec(){
+				window.clearTimeout(_timer);
+					_left=parseInt((_s.currentStyle||window.getComputedStyle(_s,null))["left"].replace("px",""));
+					_left=(_left<=-m_l?0:_left);
+					_s.style.left=_left-step+"px";
+					_left=parseInt((_s.currentStyle||window.getComputedStyle(_s,null))["left"].replace("px",""));
+					if(_left%_container.clientWidth==0){
+						_index=Math.abs(_left)/_container.clientWidth;
+						_index=_index==_c.children.length?0:_index;
+						pointControl();
+						_timer=window.setTimeout(exec,2000);
+					}else{
+						_timer=window.setTimeout(exec,_t)
+					}
+				
+			})()
+		}
+		this.circleClick=function(n){
+			 var m_l=_container.clientWidth*(_s.children.length-1);
+        var _left=0;
+        (function exec(){
+            window.clearTimeout(_timer);
+            _left=parseInt((_s.currentStyle || window.getComputedStyle(_s,null))["left"].replace(/px/g,""));
+            _left=(_left<=-m_l?0:_left);
+            _s.style.left=_left-step+"px";
+            _left=parseInt((_s.currentStyle || window.getComputedStyle(_s,null))["left"].replace(/px/g,""));
+            // console.log(_left+","+_container.clientWidth*n);
+            if(_left<=-m_l){
+                _left=0;
+            }
+            if(_left==-_container.clientWidth*n) {
+                _index=Math.abs(_left)/_container.clientWidth;
+                _index=_index==_c.children.length?0:_index;
+                pointControl();
+                _timer = window.setTimeout(exec, 2000);
+            }else{
+                _timer = window.setTimeout(exec, _t);
+            }
+        })();
+		}
+	}
+	</script>
+</head>
+<body>
+<div id="container">
+	<div id="slider"></div>
+	<div id="arrow">
+		<span id="a_l">&lt;</span>
+		<span id="a_r">&gt;</span>
+	</div>
+	<div id="circle"></div>
+</div>	
+</body>
+</html>
